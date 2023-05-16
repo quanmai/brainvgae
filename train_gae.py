@@ -23,8 +23,8 @@ if __name__ == "__main__":
     parser.add_argument('--lr', type=float, default=0.01, help='Initial learning rate.')
     parser.add_argument('--lambda0', type=float, default=1, help='Class loss factor')
     parser.add_argument('--lambda1', type=float, default=0.2, help='Site loss factor')
-    parser.add_argument('--lambda2', type=float, default=0.2, help='Attention loss factor')
-    parser.add_argument('--lambda3', type=float, default=0.2, help='Edge loss factor')
+    parser.add_argument('--lambda2', type=float, default=0.1, help='Attention loss factor')
+    parser.add_argument('--lambda3', type=float, default=0.5, help='Edge loss factor')
     parser.add_argument('--alpha', type=float, default=0.5, help='Edge drop factor')
     parser.add_argument('--beta', type=float, default=0.5, help='Hmm factor')
     parser.add_argument('--weight_decay', type=float, default=5e-4, help='Weight decay (L2 loss on parameters).')
@@ -34,9 +34,11 @@ if __name__ == "__main__":
     parser.add_argument('--seed', type=int, default=123, help='Seed for RNG')
     parser.add_argument('--ratio', type=float, default=0.5, help='Pooling ratio')
     parser.add_argument('--aggr', type=str, default='add', help='Node aggregation')
+    parser.add_argument('--gnn', type=str, default='gcn', help='GNN Layer')
     parser.add_argument('--nosite', action='store_true', default=False, help='Using site adaptation')
     parser.add_argument('--pretrain-cl', action='store_true', default=False, help='Pretrain classifier net')
     parser.add_argument('--pretrain-ep', action='store_true', default=False, help='Pretrain ep net')
+    parser.add_argument('--ep', action='store_true', default=False, help='ep net')
     parser.add_argument('--mix', action='store_true', default=False, help='Mix final adj')
     args = parser.parse_args()
 
@@ -55,7 +57,7 @@ if __name__ == "__main__":
     batch_val = args.batch
     if args.mix:
         batch_val = 1
-    train_loader = DataLoader(train_dataset, batch_size=args.batch, shuffle=True) # add augmentation
+    train_loader = DataLoader(train_dataset, batch_size=args.batch, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=batch_val, shuffle=False)
     test_loader = DataLoader(test_dataset, batch_size=batch_val, shuffle=False)
 
@@ -81,9 +83,12 @@ if __name__ == "__main__":
                      pretrain_cl=args.pretrain_cl,
                      pretrain_ep=args.pretrain_ep,
                      beta=args.beta,
+                    #  sampling='bernouli',
                      sampling='addremove',
                      mix=args.mix,
-                     aggr=args.aggr
+                     aggr=args.aggr,
+                     gnn=args.gnn,
+                     edgepredictor=args.ep
                      )
     model.fit(args.patience)
 
